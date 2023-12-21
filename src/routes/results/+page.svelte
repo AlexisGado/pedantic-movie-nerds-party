@@ -1,14 +1,29 @@
 <script lang="ts">
-	export let data;
+	import type { PageData } from './$types';
+	export let data: PageData;
 </script>
 
 {#await data.streaming.result}
-	<p>loading...</p>
+	<p>Loading...</p>
+	<ul>
+		{#each data.streaming.lists as list}
+			<li>
+				Fetching movies from {list[0]}'s watchlist -
+				{#await list[1]}
+					{' ⏳'}
+				{:then}
+					{' ✅'}
+				{:catch}
+					{' ❌'}
+				{/await}
+			</li>
+		{/each}
+	</ul>
 {:then results}
 	<ul>
-		{#each results as { movie, count }}
+		{#each results as { name, count }}
 			<li>
-				{movie} : {count}
+				{name} : {count}
 			</li>
 		{/each}
 	</ul>

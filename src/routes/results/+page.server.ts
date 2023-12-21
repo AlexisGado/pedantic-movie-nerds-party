@@ -1,13 +1,19 @@
 import * as cheerio from 'cheerio';
 
+interface Movie {
+	name: string;
+	path: string;
+}
+
 async function fetch_page(url: string) {
 	const content = await (await fetch(url)).text();
 	const $ = cheerio.load(content);
-	const movies: string[] = [];
-	$('li.poster-container>div>img').each(function () {
-		const movie = $(this).attr('alt');
-		if (!movie) throw new Error('No movie name found');
-		movies.push(movie);
+	const movies: Movie[] = [];
+	$('li.poster-container>div.poster').each(function () {
+		const path = $(this).attr('data-film-slug');
+		const name = $(this).find('img').attr('alt');
+		if (!name || !path) throw new Error('No movie name found');
+		movies.push({ name, path: `/${path}` });
 	});
 	return movies;
 }
@@ -23,30 +29,38 @@ async function fetch_all_movies(url: string) {
 	return all_pages.flat();
 }
 
-async function aggregate_movies(promises: Promise<string[]>[]) {
+async function aggregate_movies(promises: Promise<Movie[]>[]) {
 	const movies = await Promise.all(promises);
-	const movies_with_count: { [k: string]: number } = movies
+	const movies_with_count: Record<string, { count: number; name: string }> = movies
 		.flat()
-		.reduce<{ [k: string]: number }>((acc, movie) => {
-			acc[movie] = (acc[movie] || 0) + 1;
+		.reduce<Record<string, { count: number; name: string }>>((acc, movie) => {
+			if (!acc[movie.path]) {
+				acc[movie.path] = { count: 1, name: movie.name };
+			} else {
+				acc[movie.path].count++;
+			}
 			return acc;
 		}, {});
 
 	const result = Object.entries(movies_with_count)
-		.sort((a, b) => b[1] - a[1])
-		.map(([movie, count]) => ({ movie, count }));
+		.sort((a, b) => b[1].count - a[1].count)
+		.map(([path, { count, name }]) => ({ path, count, name }))
+		.slice(0, 200);
 	return result;
 }
 
 export async function load({ url }) {
 	const lists = url.searchParams.getAll('list');
-	const promises = lists.map((list) =>
-		fetch_all_movies(`https://letterboxd.com/${list}/watchlist/`)
+	const promises = lists.map(
+		(list) => [list, fetch_all_movies(`https://letterboxd.com/${list}/watchlist/`)] as const
 	);
 
 	return {
 		streaming: {
-			result: aggregate_movies(promises)
+			result: aggregate_movies(promises.map(([, p]) => p)),
+			lists: promises.map(
+				([l, p]) => [l, new Promise<void>((resolve) => p.then(() => resolve()))] as const
+			)
 		}
 	};
 }

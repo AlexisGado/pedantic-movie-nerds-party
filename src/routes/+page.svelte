@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
+	import { onDestroy } from 'svelte';
 
 	let urlParams = $page.url.searchParams.getAll('list');
 	let lists = urlParams.length ? urlParams : [''];
@@ -9,12 +10,14 @@
 	function getQueryParams(lists: string[]) {
 		let query = new URLSearchParams();
 		lists.filter((list) => !!list).forEach((list) => query.append('list', list));
-		let strQuery = query.toString();
-		if (browser) goto(`?${strQuery}`, { keepFocus: true });
-		return strQuery;
+		return query.toString();
 	}
-	$: queryParams = getQueryParams(lists);
-	$: resultUrl = `/results?${queryParams}`;
+
+	function submit() {
+		let queryParams = getQueryParams(lists);
+		history.pushState(null, '', `/?${queryParams}`);
+		goto(`/results?${queryParams}`);
+	}
 </script>
 
 <h1>Welcome to PMNP</h1>
@@ -34,4 +37,4 @@
 
 <button on:click={() => (lists = [...lists, ''])}>Add</button>
 
-<a href={resultUrl}>Lez go</a>
+<button on:click={() => submit()}>Lez go</button>

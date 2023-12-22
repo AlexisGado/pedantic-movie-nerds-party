@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
-	import { browser } from '$app/environment';
-	import { onDestroy } from 'svelte';
+	import { goto, pushState} from '$app/navigation';
+	import type { PageData } from './$types';
 
-	let urlParams = $page.url.searchParams.getAll('list');
-	let lists = urlParams.length ? urlParams : [''];
+	export let data: PageData;
+	let lists = data.lists;
 
 	function getQueryParams(lists: string[]) {
 		let query = new URLSearchParams();
@@ -15,7 +13,7 @@
 
 	function submit() {
 		let queryParams = getQueryParams(lists);
-		history.pushState(null, '', `/?${queryParams}`);
+		pushState(`/?${queryParams}`, {}); // TODO: Fix that (create gh issue)
 		goto(`/results?${queryParams}`);
 	}
 </script>

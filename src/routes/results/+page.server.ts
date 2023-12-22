@@ -1,3 +1,4 @@
+import { error } from '@sveltejs/kit';
 import * as cheerio from 'cheerio';
 
 interface Movie {
@@ -6,7 +7,12 @@ interface Movie {
 }
 
 async function fetch_page(url: string) {
-	const content = await (await fetch(url)).text();
+	let content;
+	try {
+		content = await (await fetch(url)).text();
+	} catch {
+		return error(500, { message: `Couldn't fetch from ${url}` });
+	}
 	const $ = cheerio.load(content);
 	const movies: Movie[] = [];
 	$('li.poster-container>div.poster').each(function () {
@@ -19,10 +25,19 @@ async function fetch_page(url: string) {
 }
 
 async function fetch_all_movies(url: string) {
-	const content = await (await fetch(url)).text();
+	let content;
+	try {
+		content = await (await fetch(url)).text();
+	} catch {
+		return error(500, { message: `Couldn't fetch from ${url}` });
+	}
 	const $ = cheerio.load(content);
 	const nb_pages = parseInt($('div.pagination ul').children('li').last().text());
-	if (!nb_pages) return fetch_page(url);
+	if (!nb_pages) {
+		const res = await fetch_page(url);
+		if (!res.length) return error(500, { message: 'No movie found' });
+		return res;
+	}
 	const all_pages = await Promise.all(
 		Array.from({ length: nb_pages }, (_, i) => fetch_page(`${url}/page/${i + 1}/`))
 	);
@@ -59,7 +74,11 @@ export async function load({ url }) {
 		streaming: {
 			result: aggregate_movies(promises.map(([, p]) => p)),
 			lists: promises.map(
-				([l, p]) => [l, new Promise<void>((resolve) => p.then(() => resolve()))] as const
+				([l, p]) =>
+					[
+						l,
+						new Promise<void>((resolve, reject) => p.then(() => resolve()).catch(reject))
+					] as const
 			)
 		}
 	};

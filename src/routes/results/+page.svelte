@@ -20,13 +20,18 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		padding-bottom: 1rem;
 	}
 	.movie-item {
 		width: 400px;
 		height: 150px;
+		border: .2rem solid black;
 		display: flex;
-		justify-content: center;
+		flex-direction: column;
+		justify-content: space-evenly;
+		align-items: center;
 		font-family: 'Courier New', Courier, monospace;
+		text-align: center;
 	}
 	.movie-title {
 		font-weight: bold;
@@ -57,11 +62,11 @@
 			<li>
 				<a href={`${filmUrl}${path}`} class="movie-list-item">
 					<div class="movie-item">
-						<div class="movie-title">
+						<span class="movie-title">
 							{name}
-						</div>
+						</span>
+						<span>{count}</span>
 					</div>
-					<p>{count}</p>
 				</a>
 
 			</li>

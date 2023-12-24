@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, pushState} from '$app/navigation';
+	import { goto, replaceState } from '$app/navigation';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -13,7 +13,7 @@
 
 	function submit() {
 		let queryParams = getQueryParams(lists);
-		pushState(`/?${queryParams}`, {}); // TODO: Fix that (create gh issue)
+		replaceState(`/?${queryParams}`, {}); // TODO: Fix that (create gh issue)
 		goto(`/results?${queryParams}`);
 	}
 </script>

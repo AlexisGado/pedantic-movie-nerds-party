@@ -6,6 +6,34 @@
 	const filmUrl = "https://letterboxd.com/film"
 </script>
 
+<style>
+	a {
+		color: unset;
+		text-decoration: unset;
+	}
+	.movies-list {
+		list-style-type: none;
+		padding: 0;
+		margin: 0;
+	}
+	.movie-list-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.movie-item {
+		width: 400px;
+		height: 150px;
+		display: flex;
+		justify-content: center;
+		font-family: 'Courier New', Courier, monospace;
+	}
+	.movie-title {
+		font-weight: bold;
+		text-transform: uppercase;
+	}
+</style>
+
 <a href={`/${$page.url.search}`}>Back to search</a>
 	<ul>
 		{#each data.streaming.lists as list}
@@ -24,10 +52,18 @@
 {#await data.streaming.result}
 	<p>Loading...</p>
 {:then results}
-	<ul>
+	<ul class="movies-list">
 		{#each results as { path, name, count }}
 			<li>
-				<a href={`${filmUrl}${path}`}>{name}</a> : {count}
+				<a href={`${filmUrl}${path}`} class="movie-list-item">
+					<div class="movie-item">
+						<div class="movie-title">
+							{name}
+						</div>
+					</div>
+					<p>{count}</p>
+				</a>
+
 			</li>
 		{/each}
 	</ul>

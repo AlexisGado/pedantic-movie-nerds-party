@@ -1,6 +1,16 @@
+interface List {
+	user: string;
+	list: string;
+}
 export function load({ url }) {
-	const urlParams = url.searchParams.getAll('list');
-	const lists = urlParams.length ? urlParams : [''];
-	// console.log(url.toString());
-	return { lists };
+	try {
+		const urlParams: List[] = url.searchParams.getAll('list').map((el) => {
+			const els = el.split(',,,');
+			return { user: els[0], list: els[1] };
+		});
+		if (urlParams.length === 0) throw new Error('No list found');
+		return { lists: urlParams };
+	} catch {
+		return { lists: [{ user: '', list: 'watchlist' }] };
+	}
 }

@@ -38,6 +38,7 @@ async function fetch_all_movies(url: string) {
 		if (!res.length) return error(500, { message: 'No movie found' });
 		return res;
 	}
+	if (nb_pages > 100) return error(500, { message: 'Too many pages' });
 	const all_pages = await Promise.all(
 		Array.from({ length: nb_pages }, (_, i) => fetch_page(`${url}/page/${i + 1}/`))
 	);
@@ -66,9 +67,14 @@ async function aggregate_movies(promises: Promise<Movie[]>[]) {
 
 export async function load({ url }) {
 	const lists = url.searchParams.getAll('list');
-	const promises = lists.map(
-		(list) => [list, fetch_all_movies(`https://letterboxd.com/${list}/watchlist/`)] as const
-	);
+	const promises = lists.map((el) => {
+		const [user, list] = el.split(',,,');
+		const url =
+			list === 'watchlist'
+				? `https://letterboxd.com/${user}/watchlist/`
+				: `https://letterboxd.com/${user}/list/${list}/`;
+		return [user, fetch_all_movies(url)] as const;
+	});
 
 	return {
 		streaming: {

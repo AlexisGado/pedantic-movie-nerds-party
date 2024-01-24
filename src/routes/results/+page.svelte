@@ -6,7 +6,7 @@
 	const filmUrl = 'https://letterboxd.com/film';
 </script>
 
-<a href={`/${$page.url.search}`}>Back to search</a>
+<a href={`/${$page.url.search}`} class="back-button">{'<= Back to search'}</a>
 {#await data.streaming.result}
 	<ul>
 		{#each data.streaming.lists as list}
@@ -30,28 +30,25 @@
 		{#each results as { path, name, count }}
 			<li>
 				<div class="movie-list-item">
-					<a
-						href={`${filmUrl}${path}`}
-						class="movie-item"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						<div class="vertical-number-left">1234</div>
-						<div class="separator" />
-						<div class="center">
-							<span class="movie-title">
-								{name}
-							</span>
-							<span>{count}</span>
-						</div>
-						<div class="separator" />
-						<div class="vertical-number-right">1234</div>
-
-						<div class="corner top left" />
-						<div class="corner top right" />
-						<div class="corner bottom left" />
-						<div class="corner bottom right" />
-					</a>
+					<div class="movie-item-border">
+						<a
+							href={`${filmUrl}${path}`}
+							class="movie-item"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<div class="vertical-number-left">1234</div>
+							<div class="separator" />
+							<div class="center">
+								<span class="movie-title">
+									{name}
+								</span>
+								<span>{count}</span>
+							</div>
+							<div class="separator" />
+							<div class="vertical-number-right">1234</div>
+						</a>
+					</div>
 				</div>
 			</li>
 		{/each}
@@ -61,9 +58,20 @@
 {/await}
 
 <style>
+	:root {
+		--corner-radius: 20px;
+	}
 	a {
 		color: unset;
 		text-decoration: unset;
+	}
+	.back-button {
+		background: #c8b29a;
+		font-family: 'Courier New', Courier, monospace;
+		padding: 0.5rem;
+		border: 0.2rem solid #000;
+		display: inline-block;
+		font-weight: 600;
 	}
 	.movies-list {
 		list-style-type: none;
@@ -86,10 +94,17 @@
 		align-items: center;
 		font-family: 'Courier New', Courier, monospace;
 		text-align: center;
-		position: relative;
-		overflow: hidden;
+		clip-path: path(
+			'M 23 3 L 377 3 A 20 20 0 0 0 397 23 L 397 97 A 20 20 0 0 0 377 117 L 23 117 A 20 20 0 0 0 3 97 L 3 23 A 20 20 0 0 0 23 3'
+		);
 	}
-	.movie-item:hover {
+	.movie-item-border {
+		background-color: #000;
+		clip-path: path(
+			'M 20 0 L 380 0 A 20 20 0 0 0 400 20 L 400 100 A 20 20 0 0 0 380 120 L 20 120 A 20 20 0 0 0 0 100 L 0 20 A 20 20 0 0 0 20 0'
+		);
+	}
+	.movie-item-border:hover {
 		transform: scale(1.05);
 	}
 	.vertical-number-left {
@@ -99,7 +114,7 @@
 		transform: rotate(90deg);
 	}
 	.separator {
-		width: 2px;
+		width: 0.2rem;
 		height: 50%;
 		background-color: #000;
 	}
@@ -111,28 +126,8 @@
 		justify-content: space-evenly;
 		align-items: center;
 	}
-	.corner {
-		position: absolute;
-		width: 40px;
-		height: 40px;
-		border-radius: 100%;
-		background-color: #fff;
-	}
-	.top {
-		top: -20px;
-	}
-	.bottom {
-		bottom: -20px;
-	}
-	.left {
-		left: -20px;
-	}
-	.right {
-		right: -20px;
-	}
-
 	.movie-title {
-		font-weight: bold;
+		font-weight: 900;
 		text-transform: uppercase;
 	}
 </style>

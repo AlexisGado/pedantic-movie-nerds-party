@@ -57,9 +57,49 @@
 	<p>Something went wrong</p>
 {/await}
 
+<svg style="width: 0; height: 0;">
+	<defs>
+		<clipPath id="clip-ticket" clipPathUnits="objectBoundingBox">
+			<path
+				d="M 0.06 0.04
+				L 0.94 0.04
+				A 0.06 0.24 0 0 0 0.99 0.24
+				L 0.99 0.76
+				A 0.06 0.24 0 0 0 0.94 0.96
+				L 0.06 0.96
+				A 0.06 0.24 0 0 0 0.01 0.76
+				L 0.01 0.24
+				A 0.06 0.24 0 0 0 0.06 0.04
+				Z"
+			/>
+		</clipPath>
+		<clipPath id="clip-ticket-border" clipPathUnits="objectBoundingBox">
+			<path
+				d="M 0.05 0
+				L 0.95 0
+				A 0.05 0.20 0 0 0 1 0.20
+				L 1 0.80
+				A 0.05 0.20 0 0 0 0.95 1
+				L 0.05 1
+				A 0.05 0.20 0 0 0 0 0.80
+				L 0 0.20
+				A 0.05 0.20 0 0 0 0.05 0
+				Z"
+			/>
+		</clipPath>
+	</defs>
+</svg>
+
 <style>
 	:root {
+		--item-width: 450;
 		--corner-radius: 20px;
+		--item-height: calc(var(--item-width) / 4);
+	}
+	@media (max-width: 600px) {
+		:root {
+			--item-width: 300;
+		}
 	}
 	a {
 		color: unset;
@@ -85,8 +125,8 @@
 		padding-bottom: 1rem;
 	}
 	.movie-item {
-		width: 400px;
-		height: 120px;
+		width: calc(var(--item-width) * 1px);
+		height: calc(var(--item-height) * 1px);
 		background-color: #c8b29a;
 		display: flex;
 		flex-direction: row;
@@ -94,15 +134,11 @@
 		align-items: center;
 		font-family: 'Courier New', Courier, monospace;
 		text-align: center;
-		clip-path: path(
-			'M 23 3 L 377 3 A 20 20 0 0 0 397 23 L 397 97 A 20 20 0 0 0 377 117 L 23 117 A 20 20 0 0 0 3 97 L 3 23 A 20 20 0 0 0 23 3'
-		);
+		clip-path: url(#clip-ticket);
 	}
 	.movie-item-border {
 		background-color: #000;
-		clip-path: path(
-			'M 20 0 L 380 0 A 20 20 0 0 0 400 20 L 400 100 A 20 20 0 0 0 380 120 L 20 120 A 20 20 0 0 0 0 100 L 0 20 A 20 20 0 0 0 20 0'
-		);
+		clip-path: url(#clip-ticket-border);
 	}
 	.movie-item-border:hover {
 		transform: scale(1.05);

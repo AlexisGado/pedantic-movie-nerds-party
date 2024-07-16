@@ -35,10 +35,10 @@ async function fetch_all_movies(url: string) {
 	const nb_pages = parseInt($('div.pagination ul').children('li').last().text());
 	if (!nb_pages) {
 		const res = await fetch_page(url);
-		if (!res.length) return error(500, { message: 'No movie found' });
+		if (!res.length) return error(500, { message: `No movie found at ${url}` });
 		return res;
 	}
-	if (nb_pages > 100) return error(500, { message: 'Too many pages' });
+	if (nb_pages > 100) return error(500, { message: `Too many pages in this list: ${url}` });
 	const all_pages = await Promise.all(
 		Array.from({ length: nb_pages }, (_, i) => fetch_page(`${url}/page/${i + 1}/`))
 	);
@@ -61,7 +61,7 @@ async function aggregate_movies(promises: Promise<Movie[]>[]) {
 	const result = Object.entries(movies_with_count)
 		.sort((a, b) => b[1].count - a[1].count)
 		.map(([path, { count, name }]) => ({ path, count, name }))
-		.slice(0, 200);
+		.slice(0, 100);
 	return result;
 }
 
@@ -73,15 +73,16 @@ export async function load({ url }) {
 			list === 'watchlist'
 				? `https://letterboxd.com/${user}/watchlist/`
 				: `https://letterboxd.com/${user}/list/${list}/`;
-		return [user, fetch_all_movies(url)] as const;
+		return [user, list, fetch_all_movies(url)] as const;
 	});
 
 	return {
 		streaming: {
-			result: aggregate_movies(promises.map(([, p]) => p)),
+			result: aggregate_movies(promises.map(([, , p]) => p)),
 			lists: promises.map(
-				([l, p]) =>
+				([u, l, p]) =>
 					[
+						u,
 						l,
 						new Promise<void>((resolve, reject) => p.then(() => resolve()).catch(reject))
 					] as const

@@ -4,30 +4,35 @@
 	export let data: PageData;
 
 	const filmUrl = 'https://letterboxd.com/film';
+
+	const random4digit = () => {
+		const nb = Math.floor(Math.random() * 10000);
+		return String(nb).padStart(4, '0');
+	};
 </script>
 
 <a href={`/${$page.url.search}`} class="back-button">{'<= Back to search'}</a>
-{#await data.streaming.result}
+<div class="progress-info">
 	<ul>
 		{#each data.streaming.lists as list}
 			<li>
-				Fetching movies from {list[0]}'s watchlist -
-				{#await list[1]}
+				{#await list[2]}
 					{' ⏳'}
 				{:then}
 					{' ✅'}
 				{:catch}
 					{' ❌'}
 				{/await}
+				- Fetching movies from {list[0]}'s {list[1]}
 			</li>
 		{/each}
 	</ul>
-{/await}
-{#await data.streaming.result}
-	<p>Loading...</p>
-{:then results}
+</div>
+
+{#await data.streaming.result then results}
 	<ul class="movies-list">
 		{#each results as { path, name, count }}
+			{@const randomNb = random4digit()}
 			<li>
 				<div class="movie-list-item">
 					<div class="movie-item-border">
@@ -37,24 +42,24 @@
 							target="_blank"
 							rel="noopener noreferrer"
 						>
-							<div class="vertical-number-left">1234</div>
+							<div class="vertical-number-left">{randomNb}</div>
 							<div class="separator" />
 							<div class="center">
 								<span class="movie-title">
 									{name}
 								</span>
-								<span>{count}</span>
+								<span><span style="font-size: large; font-weight: 600;">{count}</span> hits</span>
 							</div>
 							<div class="separator" />
-							<div class="vertical-number-right">1234</div>
+							<div class="vertical-number-right">{randomNb}</div>
 						</a>
 					</div>
 				</div>
 			</li>
 		{/each}
 	</ul>
-{:catch}
-	<p>Something went wrong</p>
+{:catch e}
+	<div class="error-message">{e.message}</div>
 {/await}
 
 <svg style="width: 0; height: 0;">
@@ -105,18 +110,36 @@
 		color: unset;
 		text-decoration: unset;
 	}
+	li {
+		list-style: none;
+	}
 	.back-button {
-		background: #c8b29a;
-		font-family: 'Courier New', Courier, monospace;
+		background: var(--beige);
+		font-family: var(--font-family);
 		padding: 0.5rem;
+		margin: 1rem;
 		border: 0.2rem solid #000;
 		display: inline-block;
 		font-weight: 600;
 	}
+	.back-button:hover {
+		transform: scale(1.05);
+	}
+
+	.progress-info {
+		font-family: var(--font-family);
+		padding: 0.5rem;
+		margin: 0.5rem;
+
+		background: var(--beige);
+		border: 0.2rem solid #000;
+	}
+
 	.movies-list {
 		list-style-type: none;
 		padding: 0;
 		margin: 0;
+		margin-top: 1rem;
 	}
 	.movie-list-item {
 		display: flex;
@@ -127,12 +150,12 @@
 	.movie-item {
 		width: calc(var(--item-width) * 1px);
 		height: calc(var(--item-height) * 1px);
-		background-color: #c8b29a;
+		background-color: var(--beige);
 		display: flex;
 		flex-direction: row;
 		justify-content: space-evenly;
 		align-items: center;
-		font-family: 'Courier New', Courier, monospace;
+		font-family: var(--font-family);
 		text-align: center;
 		clip-path: url(#clip-ticket);
 	}
@@ -165,5 +188,16 @@
 	.movie-title {
 		font-weight: 900;
 		text-transform: uppercase;
+	}
+	.error-message {
+		font-family: var(--font-family);
+		font-weight: 600;
+		color: var(--red-bg);
+
+		padding: 0.5rem;
+		margin: 0.5rem;
+
+		background: var(--beige);
+		border: 0.2rem solid #000;
 	}
 </style>

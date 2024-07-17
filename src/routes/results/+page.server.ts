@@ -45,22 +45,25 @@ async function fetch_all_movies(url: string) {
 	return all_pages.flat();
 }
 
-async function aggregate_movies(promises: Promise<Movie[]>[]) {
-	const movies = await Promise.all(promises);
-	const movies_with_count: Record<string, { count: number; name: string }> = movies
-		.flat()
-		.reduce<Record<string, { count: number; name: string }>>((acc, movie) => {
-			if (!acc[movie.path]) {
-				acc[movie.path] = { count: 1, name: movie.name };
+async function aggregate_movies(promises: Promise<{ listName: string; movies: Movie[] }>[]) {
+	const listNamesAndMovies = await Promise.all(promises);
+
+	const movies_with_count: Record<string, { count: number; name: string; hits: string[] }> = {};
+
+	for (const { listName, movies } of listNamesAndMovies) {
+		for (const movie of movies) {
+			if (!movies_with_count[movie.path]) {
+				movies_with_count[movie.path] = { count: 1, name: movie.name, hits: [listName] };
 			} else {
-				acc[movie.path].count++;
+				movies_with_count[movie.path].count++;
+				movies_with_count[movie.path].hits.push(listName);
 			}
-			return acc;
-		}, {});
+		}
+	}
 
 	const result = Object.entries(movies_with_count)
 		.sort((a, b) => b[1].count - a[1].count)
-		.map(([path, { count, name }]) => ({ path, count, name }))
+		.map(([path, { count, name, hits }]) => ({ path, count, name, hits }))
 		.slice(0, 100);
 	return result;
 }
@@ -78,7 +81,11 @@ export async function load({ url }) {
 
 	return {
 		streaming: {
-			result: aggregate_movies(promises.map(([, , p]) => p)),
+			result: aggregate_movies(
+				promises.map(async ([u, l, p]) => {
+					return { listName: l === 'watchlist' ? u : l, movies: await p };
+				})
+			),
 			lists: promises.map(
 				([u, l, p]) =>
 					[

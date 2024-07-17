@@ -31,7 +31,7 @@
 
 {#await data.streaming.result then results}
 	<ul class="movies-list">
-		{#each results as { path, name, count }}
+		{#each results as { path, name, count, hits }}
 			{@const randomNb = random4digit()}
 			<li>
 				<div class="movie-list-item">
@@ -45,10 +45,14 @@
 							<div class="vertical-number-left">{randomNb}</div>
 							<div class="separator" />
 							<div class="center">
-								<span class="movie-title">
+								<div class="movie-title">
 									{name}
-								</span>
-								<span><span style="font-size: large; font-weight: 600;">{count}</span> hits</span>
+								</div>
+								<div>
+									<span style="font-size: large; font-weight: 600;">{count}</span> hits ({hits.join(
+										', '
+									)})
+								</div>
 							</div>
 							<div class="separator" />
 							<div class="vertical-number-right">{randomNb}</div>
@@ -178,12 +182,17 @@
 		background-color: #000;
 	}
 	.center {
-		height: 100%;
+		max-height: 100%;
 		width: 80%;
+
 		display: flex;
 		flex-direction: column;
-		justify-content: space-evenly;
 		align-items: center;
+
+		margin: auto 0; /* space-evenly not working on safari when overflow */
+		padding: 0.5rem;
+
+		overflow: auto;
 	}
 	.movie-title {
 		font-weight: 900;

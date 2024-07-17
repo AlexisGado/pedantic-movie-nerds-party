@@ -62,6 +62,11 @@ async function aggregate_movies(promises: Promise<{ listName: string; movies: Mo
 	}
 
 	const result = Object.entries(movies_with_count)
+		// start shuffling
+		.map((value) => ({ value, sort: Math.random() }))
+		.sort((a, b) => a.sort - b.sort)
+		.map(({ value }) => value)
+		// end shuffling
 		.sort((a, b) => b[1].count - a[1].count)
 		.map(([path, { count, name, hits }]) => ({ path, count, name, hits }))
 		.slice(0, 100);
